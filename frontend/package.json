@@ -28,7 +28,6 @@
     "react-typing-effect": "^2.0.5",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "typewriter-effect": "^2.21.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

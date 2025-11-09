@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import Typewriter from "typewriter-effect";
 import SignupModal from "./Signup";
 
 const ChatWidget = () => {
@@ -29,10 +28,17 @@ const ChatWidget = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://chatai-sigma-six.vercel.app/chat", {
-        pdfUrl,
-        question,
-      });
+      const token = localStorage.getItem("authToken");
+      const res = await axios.post(
+        "http://localhost:5000/api/chat/ask",
+        {
+          pdfUrl,
+          question,
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+      );
 
       setMessages((prev) => [
         ...prev,
@@ -42,7 +48,11 @@ const ChatWidget = () => {
       console.error("Error:", error);
       setMessages((prev) => [
         ...prev,
-        { text: "There was an error processing your request.", sender: "ai" },
+        {
+          text:
+            "There was an error processing your request. Please try again later.",
+          sender: "ai",
+        },
       ]);
     }
     setLoading(false);
@@ -320,7 +330,7 @@ const ChatWidget = () => {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-700 mb-2">How can I help you today?</h3>
                   <p className="text-gray-500 max-w-md">
-                    Enter a PDF URL and ask questions about your medical documents. I'm here to analyze and explain your reports.
+                    Enter a PDF URL and ask questions about your medical documents. I&apos;m here to analyze and explain your reports.
                   </p>
                 </div>
               ) : (
@@ -397,7 +407,7 @@ const ChatWidget = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            Doctors' Features
+            Doctors&apos; Features
           </h2>
         </div>
         <div className="p-4 flex-1">

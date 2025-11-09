@@ -559,7 +559,7 @@ const VaultPage = () => {
                   testReport === "scans" &&
                   scanName &&
                   DocumentName &&
-                  files.length > 0
+                  selectedFile
                 ) {
                   setIsUploading(true);
                   // Make sure you have the file selected
@@ -572,13 +572,12 @@ const VaultPage = () => {
                       alert(error);
                     }
                   );
-                }
-                if (
+                } else if (
                   testReport === "prescriptions" &&
                   doctorName &&
                   hospitalName &&
                   diseaseName &&
-                  files.length > 0
+                  selectedFile
                 ) {
                   setIsUploading(true);
                   // Make sure you have the file selected
@@ -593,12 +592,11 @@ const VaultPage = () => {
                       alert(error);
                     }
                   );
-                }
-                if (
+                } else if (
                   testReport === "labreport" &&
                   reportName &&
                   DocumentName &&
-                  files.length > 0
+                  selectedFile
                 ) {
                   setIsUploading(true);
                   // Make sure you have the file selected

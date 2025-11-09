@@ -204,7 +204,7 @@ const LandingPage = () => {
     }
 
     console.log("Upload successful:", data);
-    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/usersrep/${data.path}`;
+    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/Mediseek/${data.path}`;
     console.log("📌 File URL:", fileUrl);
 
     try {

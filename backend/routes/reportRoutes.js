@@ -163,8 +163,8 @@ router.post('/uploadprescription',authMiddleware, async (req, res) => {
 
 
 
-      const genAI = new GoogleGenerativeAI('AIzaSyBCOb-nGoETvhIQKY6KjXouGICkr8DK2rE');
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const genAI = new GoogleGenerativeAI('AIzaSyC2ATEyBpS31Iqjwqi4ry8GgtS4Ryzw2wc');
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       
       router.post('/process-report', async (req, res) => {
           const { extractedData } = req.body;
@@ -302,36 +302,60 @@ router.post('/uploadprescription',authMiddleware, async (req, res) => {
         });
       }
 
-      router.post('/generate-summary', async (req, res) => {
-        const { extractedData } = req.body;
-    
-        const summaryCommand = `Please provide a 15 to 20 line summary of the following blood report data in simple language that anyone can understand. 
-        Highlight important points like abnormalities, key health indicators, and any actionable insights, but avoid medical jargon. 
-        Keep the tone friendly and informative. Give me the response in plain text without any star symbols or anything ready to paste and use kind of remember do not
-        include any star symbol and or anything in the text and write the summary in a way that it is easy to understand for a layman also when you give response start with summary powered by 
-        meediseek ai and then write in text format entire summary remove any special symbol or asterick symbol from the response.`;
-    
-        const prompt = `
-          You are an AI assistant tasked with summarizing blood report data.
-          Here is the extracted data:
-          ${extractedData}
-          ${summaryCommand}
-          Return only the summary, without any extra explanations or headers.
-        `;
-    
+      router.post("/generate-summary", async (req, res) => {
         try {
-            const result = await model.generateContent({
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-            });
-    
-            const summary = result.response.candidates[0].content.parts[0].text;
-    
-            res.json({ summary });
+          const { extractedData } = req.body;
+
+          if (!extractedData || typeof extractedData !== "string" || !extractedData.trim()) {
+            return res
+              .status(400)
+              .json({ message: "Extracted data is required to generate a summary." });
+          }
+
+          const summaryCommand = `Please provide a 15 to 20 line summary of the following blood report data in simple language that anyone can understand. 
+          Highlight important points like abnormalities, key health indicators, and any actionable insights, but avoid medical jargon. 
+          Keep the tone friendly and informative. Give me the response in plain text without any star symbols or anything ready to paste and use kind of remember do not
+          include any star symbol and or anything in the text and write the summary in a way that it is easy to understand for a layman also when you give response start with summary powered by 
+          meediseek ai and then write in text format entire summary remove any special symbol or asterick symbol from the response.`;
+
+          const prompt = `
+            You are an AI assistant tasked with summarizing blood report data.
+            Here is the extracted data:
+            ${extractedData}
+            ${summaryCommand}
+            Return only the summary, without any extra explanations or headers.
+          `;
+
+          const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+          });
+
+          const summary =
+            result?.response?.text?.() ??
+            result?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          if (!summary || typeof summary !== "string") {
+            throw new Error("Generative model returned an empty summary.");
+          }
+
+          res.json({ summary });
         } catch (error) {
-            console.error('Error generating summary:', error);
-            res.status(500).send('Failed to generate summary');
+          console.error("Error generating summary:", error?.response ?? error);
+
+          const statusCode = error?.response?.status ?? 500;
+          const message =
+            error?.response?.data?.error ??
+            error?.message ??
+            "Failed to generate summary";
+
+          res
+            .status(statusCode >= 400 && statusCode < 600 ? statusCode : 500)
+            .json({
+              message: "Failed to generate summary",
+              details: message,
+            });
         }
-    });      
+      });      
 
   
 router.get('/extract/:reportId', authMiddleware, async (req, res) => {
@@ -363,36 +387,11 @@ router.get('/extract/:reportId', authMiddleware, async (req, res) => {
         console.log("📄 Extracted Data:", extractedText);
 
         // Create a PDF from the extracted text
-        const doc = new PDFDocument();
-        
-        // Set the response header to download the PDF file
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=health_report.pdf');
-
-        // Pipe the PDF document to the response
-        doc.pipe(res);
-
-        // Add content to the PDF
-        doc.fontSize(18).text('Electronic Health Report', { align: 'center' });
-        doc.moveDown();
-
-        doc.fontSize(12).text(`Patient Name: ${report.patientName}`);
-        doc.text(`Test Type: ${report.testType}`);
-        doc.text(`Date: ${new Date(report.date).toLocaleDateString()}`);
-        doc.moveDown();
-
-        // Add the extracted data (the report content)
-        doc.fontSize(10).text(`Extracted Report Data:\n${extractedText}`);
-
-        // Finalize the PDF document
-        doc.end();
-
+        // Send extracted data without generating a PDF
+        res.status(200).json({ extractedData });
     } catch (error) {
-        console.error("❌ Extraction and PDF Generation Error:", error.message);
-        // Ensure no response is sent if the PDF generation fails
-        if (!res.headersSent) {
-            res.status(500).json({ message: "Failed to extract report data and generate PDF" });
-        }
+        console.error("❌ Extraction Error:", error.message);
+        res.status(500).json({ message: "Failed to extract report data" });
     }
 });// Endpoint to process the extracted report
 

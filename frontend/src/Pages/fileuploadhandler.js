@@ -24,7 +24,7 @@ export const handleFileUpload = async (scanName, documentName, file, setUploadin
       throw new Error(uploadError.message);
     }
 
-    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/scans//${data.path}`;
+    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/scans/${data.path}`;
     console.log("📌 File URL:", fileUrl);
 
 
@@ -77,7 +77,7 @@ export const handleLabUpload = async (hospitalName, DocumentName, file, setIsUpl
       throw new Error(uploadError.message);
     }
 
-    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/labreports//${data.path}`;
+    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/labreports/${data.path}`;
     console.log("📌 File URL:", fileUrl);
     
     
@@ -132,7 +132,7 @@ export const handleprescriptionUpload = async (hospitalName,diseaseName, doctorN
       throw new Error(uploadError.message);
     }
 
-    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/prescription//${data.path}`;
+    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/prescription/${data.path}`;
     console.log("📌 File URL:", fileUrl);
     
     
